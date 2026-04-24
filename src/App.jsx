@@ -1,19 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 
 const QUESTIONS = [
-  { text: "Do you trust random internet quizzes?", answers: ["Yes", "No"] },
-  { text: "Are you lucky today?", answers: ["Yes", "No"] },
-  { text: "Would you click random things?", answers: ["Yes", "No"] },
-  { text: "Do you trust this app?", answers: ["Yes", "No"] },
-  { text: "Are you bored?", answers: ["Yes", "No"] },
-  { text: "Do you want a reward?", answers: ["Yes", "No"] },
-  { text: "Final question: ready?", answers: ["Yes", "No"] }
+  {
+    text: "You find a mysterious button. What do you do?",
+    answers: ["Press it instantly", "Ask AI first", "Walk away suspiciously"]
+  },
+  {
+    text: "Choose your viral content strategy.",
+    answers: ["Memes", "Chaos", "Cute animals"]
+  },
+  {
+    text: "Final test: do you deserve the reward?",
+    answers: ["Yes", "Obviously", "I was born ready"]
+  }
 ];
 
 const MEMES = [
-  "https://your-domain.com/meme1.png",
-  "https://your-domain.com/meme2.png",
-  "https://your-domain.com/meme3.png"
+  "http://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_1.jpg",
+  "https://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_2.jpg",
+  "https://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_3.jpg"
 ];
 
 function shuffle(arr) {
@@ -21,12 +26,14 @@ function shuffle(arr) {
 }
 
 export default function App() {
+  const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(8);
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
 
   const questions = useMemo(() => {
-    return shuffle(QUESTIONS).map(q => ({
+    return shuffle(QUESTIONS).map((q) => ({
       ...q,
       answers: shuffle(q.answers)
     }));
@@ -46,59 +53,130 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!started || finished) return;
+
+    setTimeLeft(8);
+
+    const interval = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          answer();
+          return 8;
+        }
+
+        return t - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [step, started, finished]);
+
   function answer() {
     if (step + 1 < questions.length) {
-      setStep(step + 1);
+      setStep((s) => s + 1);
     } else {
-      setStep(step + 1);
-      setTimeout(() => setReady(true), 500);
+      setStep((s) => s + 1);
+      setTimeout(() => setReady(true), 700);
     }
   }
 
   function scratch() {
-    setProgress(p => Math.min(p + 25, 100));
+    setProgress((p) => Math.min(p + 20, 100));
+  }
+
+  if (!started) {
+    return (
+      <main className="app">
+        <div className="background-orb orb-one" />
+        <div className="background-orb orb-two" />
+
+        <section className="start-card">
+          <p className="label">Telegram Mini App</p>
+          <h1>Prank Quiz</h1>
+          <p className="subtitle">
+            Three questions. Eight seconds each. One suspicious reward.
+          </p>
+
+          <button className="start-button" onClick={() => setStarted(true)}>
+            Start Game
+          </button>
+        </section>
+      </main>
+    );
   }
 
   if (!finished) {
     const q = questions[step];
+
     return (
-      <div className="container">
-        <div className="card">
+      <main className="app">
+        <div className="background-orb orb-one" />
+        <div className="background-orb orb-two" />
+
+        <section className="quiz-card">
+          <div className="top-row">
+            <span>Question {step + 1}/3</span>
+            <span className={timeLeft <= 3 ? "timer danger" : "timer"}>
+              {timeLeft}s
+            </span>
+          </div>
+
+          <div className="timer-bar">
+            <div style={{ width: `${(timeLeft / 8) * 100}%` }} />
+          </div>
+
           <h2>{q.text}</h2>
-          {q.answers.map(a => (
-            <button key={a} onClick={answer}>{a}</button>
-          ))}
-        </div>
-      </div>
+
+          <div className="answers">
+            {q.answers.map((a) => (
+              <button key={a} onClick={answer}>
+                {a}
+              </button>
+            ))}
+          </div>
+        </section>
+      </main>
     );
   }
 
   return (
-    <div className="container">
-      <div className="card">
-        {!ready && <p>Calculating...</p>}
+    <main className="app">
+      <div className="background-orb orb-one" />
+      <div className="background-orb orb-two" />
+
+      <section className="quiz-card">
+        {!ready && <h2>Generating your scientifically questionable reward...</h2>}
 
         {ready && (
           <>
-            <h2>Scratch your reward</h2>
+            <p className="label">Reward unlocked</p>
+            <h2>Scratch the card</h2>
 
-            <div className="scratch" onClick={scratch}>
-              <img src={meme} />
+            <div className="scratch-card" onClick={scratch}>
+              <img src={meme} alt="Meme reward" />
+
               {progress < 100 && (
-                <div className="cover" style={{ opacity: 1 - progress / 100 }}>
-                  Scratch
+                <div
+                  className="scratch-cover"
+                  style={{ opacity: 1 - progress / 100 }}
+                >
+                  Tap to scratch
                 </div>
               )}
             </div>
 
-            {progress >= 100 && <p>You got pranked.</p>}
+            {progress >= 100 && (
+              <p className="result">You have been professionally pranked.</p>
+            )}
 
-            <button onClick={() => window.location.reload()}>
-              Restart
+            <button className="restart" onClick={() => window.location.reload()}>
+              Play Again
             </button>
           </>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
