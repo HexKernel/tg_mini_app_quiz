@@ -16,9 +16,9 @@ const QUESTIONS = [
 ];
 
 const MEMES = [
-  "http://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_1.jpg",
-  "https://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_2.jpg",
-  "https://github.com/Ratorgis/tg_mini_app_quiz/blob/main/img/photo_3.jpg"
+  `${import.meta.env.BASE_URL}/photo_1.jpg`,
+  `${import.meta.env.BASE_URL}/photo_2.jpg`,
+  `${import.meta.env.BASE_URL}/photo_3.jpg`
 ];
 
 function shuffle(arr) {
