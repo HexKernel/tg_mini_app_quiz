@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  base: "/tg_mini_app_quiz/",
   build: {
     outDir: "dist"
   }
